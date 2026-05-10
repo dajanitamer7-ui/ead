@@ -100,8 +100,6 @@
 
           <div class="ead-trust__card-icon-wrap" aria-hidden="true">
             {%- case block.settings.icon -%}
-
-              {%- when 'diamond' -%}
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M2.7 10.3a2.41 2.41 0 0 0 0 3.41l7.59 7.59a2.41 2.41 0 0 0 3.41 0l7.59-7.59a2.41 2.41 0 0 0 0-3.41L13.7 2.71a2.41 2.41 0 0 0-3.41 0Z"/><line x1="12" x2="12" y1="2.5" y2="21.5"/><path d="M2.5 10.5h19"/></svg>
 
               {%- when 'shield' -%}
@@ -140,13 +138,15 @@
             {%- endcase -%}
           </div>
 
-          {%- if block.settings.heading != blank -%}
-            <h3 class="ead-trust__card-title">{{ block.settings.heading }}</h3>
-          {%- endif -%}
+          <div class="ead-trust__card-content">
+            {%- if block.settings.heading != blank -%}
+              <h3 class="ead-trust__card-title">{{ block.settings.heading }}</h3>
+            {%- endif -%}
 
-          {%- if block.settings.description != blank -%}
-            <p class="ead-trust__card-text">{{ block.settings.description }}</p>
-          {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <p class="ead-trust__card-text">{{ block.settings.description }}</p>
+            {%- endif -%}
+          </div>
 
           <span class="ead-trust__card-accent-bar" aria-hidden="true"></span>
         </article>
@@ -375,7 +375,7 @@
     }
   }
 
-  /* ── Mobile: single column, compact stacked cards ──────── */
+  /* ── Mobile: single column horizontal cards ──────────── */
   @media screen and (max-width: 640px) {
     .ead-trust__container {
       padding: 0 16px;
@@ -388,13 +388,13 @@
       gap: 10px;
     }
     .ead-trust__card {
-      /* Horizontal layout on mobile: icon left, text right */
+      /* Icon left, text right */
       flex-direction: row;
       align-items: flex-start;
       text-align: left;
-      padding: 20px 18px;
+      padding: 16px 16px;
       min-height: 0;
-      gap: 16px;
+      gap: 14px;
       border-radius: 12px;
     }
     .ead-trust__card-icon-wrap {
@@ -405,19 +405,25 @@
       flex-shrink: 0;
     }
     .ead-trust__card-icon-wrap svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
     }
-    .ead-trust__card-body {
+    .ead-trust__card-content {
       display: flex;
       flex-direction: column;
+      gap: 4px;
+      flex: 1;
     }
     .ead-trust__card-title {
-      font-size: 13.5px;
-      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0;
     }
     .ead-trust__card-text {
-      font-size: 12px;
+      font-size: 11.5px;
+      line-height: 1.6;
+      margin: 0;
     }
     /* Accent bar on left edge for mobile */
     .ead-trust__card-accent-bar {
