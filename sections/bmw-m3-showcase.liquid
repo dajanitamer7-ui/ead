@@ -1,0 +1,1493 @@
+{% comment %}
+  Euro Auto Design — BMW G80 M3 Showcase Section
+  OS 2.0 | Cinematic studio render presentation
+  Blocks: render_slide, feature_callout, spec_item
+{% endcomment %}
+
+{%- liquid
+  assign section_id = 'ead-m3-' | append: section.id
+  assign slides     = section.blocks | where: 'type', 'render_slide'
+  assign callouts   = section.blocks | where: 'type', 'feature_callout'
+  assign specs      = section.blocks | where: 'type', 'spec_item'
+  assign slide_count = slides | size
+-%}
+
+<style>
+  /* ─── Custom Properties ─────────────────────────────────────── */
+  #{{ section_id }} {
+    --m3-bg:          {{ section.settings.bg_color }};
+    --m3-surface:     {{ section.settings.surface_color }};
+    --m3-text:        {{ section.settings.text_color }};
+    --m3-subtext:     {{ section.settings.subtext_color }};
+    --m3-accent:      {{ section.settings.accent_color }};
+    --m3-carbon:      {{ section.settings.carbon_color }};
+    --m3-border:      {{ section.settings.border_color }};
+    --m3-pt:          {{ section.settings.padding_top }}px;
+    --m3-pb:          {{ section.settings.padding_bottom }}px;
+  }
+
+  /* ─── Section Base ──────────────────────────────────────────── */
+  #{{ section_id }} {
+    background-color: var(--m3-bg);
+    color: var(--m3-text);
+    padding-top: var(--m3-pt);
+    padding-bottom: var(--m3-pb);
+    font-family: inherit;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  #{{ section_id }} *, #{{ section_id }} *::before, #{{ section_id }} *::after {
+    box-sizing: inherit;
+  }
+
+  .ead-m3__inner {
+    max-width: {{ section.settings.section_width }}px;
+    margin: 0 auto;
+    padding: 0 {{ section.settings.gutter }}px;
+  }
+
+  /* ─── Pre-heading eyebrow ───────────────────────────────────── */
+  .ead-m3__eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: {{ section.settings.header_align }};
+    margin-bottom: 16px;
+  }
+
+  .ead-m3__eyebrow-line {
+    flex: 0 0 40px;
+    height: 1px;
+    background: var(--m3-accent);
+  }
+
+  .ead-m3__eyebrow-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--m3-accent);
+    white-space: nowrap;
+  }
+
+  /* ─── Header ────────────────────────────────────────────────── */
+  .ead-m3__header {
+    text-align: {{ section.settings.header_align }};
+    margin-bottom: {{ section.settings.header_gap }}px;
+  }
+
+  .ead-m3__heading {
+    margin: 0 0 12px;
+    font-size: clamp(32px, 5vw, {{ section.settings.heading_size }}px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--m3-text);
+  }
+
+  .ead-m3__heading em {
+    font-style: normal;
+    color: var(--m3-accent);
+  }
+
+  .ead-m3__subheading {
+    margin: 0 auto;
+    max-width: 600px;
+    font-size: clamp(14px, 1.6vw, 17px);
+    color: var(--m3-subtext);
+    line-height: 1.65;
+    letter-spacing: 0.01em;
+  }
+
+  /* ─── Render Stage (main viewer) ───────────────────────────── */
+  .ead-m3__stage {
+    position: relative;
+    margin-bottom: {{ section.settings.stage_gap }}px;
+    border-radius: {{ section.settings.stage_radius }}px;
+    overflow: hidden;
+    background: var(--m3-surface);
+    {% if section.settings.stage_border %}
+    border: 1px solid var(--m3-border);
+    {% endif %}
+  }
+
+  /* Subtle vignette over the studio floor */
+  .ead-m3__stage::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 110%, rgba(0,0,0,0.55) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ─── Slide track ───────────────────────────────────────────── */
+  .ead-m3__track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+    will-change: transform;
+  }
+
+  .ead-m3__slide {
+    flex: 0 0 100%;
+    position: relative;
+    aspect-ratio: {{ section.settings.stage_aspect }};
+  }
+
+  .ead-m3__slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ead-m3__slide-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #111 0%, #1c1c1c 50%, #111 100%);
+    font-size: 14px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Slide angle badge */
+  .ead-m3__slide-badge {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 2;
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ─── Stage nav arrows ──────────────────────────────────────── */
+  .ead-m3__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    cursor: pointer;
+    color: #fff;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ead-m3__nav--prev { left: 16px; }
+  .ead-m3__nav--next { right: 16px; }
+
+  .ead-m3__nav:hover {
+    background: var(--m3-accent);
+    border-color: var(--m3-accent);
+    transform: translateY(-50%) scale(1.08);
+  }
+
+  .ead-m3__nav svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  {% if slide_count <= 1 %}
+  .ead-m3__nav { display: none; }
+  {% endif %}
+
+  /* ─── Thumbnail strip ───────────────────────────────────────── */
+  .ead-m3__thumbs {
+    display: flex;
+    gap: {{ section.settings.thumb_gap }}px;
+    justify-content: center;
+    margin-bottom: {{ section.settings.stage_gap }}px;
+    flex-wrap: wrap;
+  }
+
+  .ead-m3__thumb {
+    flex: 0 0 {{ section.settings.thumb_width }}px;
+    height: {{ section.settings.thumb_height }}px;
+    border-radius: {{ section.settings.thumb_radius }}px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid var(--m3-border);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    background: var(--m3-surface);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ead-m3__thumb:hover { border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
+  .ead-m3__thumb.is-active { border-color: var(--m3-accent); }
+
+  .ead-m3__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.35s ease;
+  }
+
+  .ead-m3__thumb:hover img { transform: scale(1.06); }
+
+  {% if slide_count <= 1 %}
+  .ead-m3__thumbs { display: none; }
+  {% endif %}
+
+  /* ─── Dots (mobile fallback) ────────────────────────────────── */
+  .ead-m3__dots {
+    display: none;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: {{ section.settings.stage_gap }}px;
+  }
+
+  .ead-m3__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--m3-border);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s ease, transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ead-m3__dot.is-active {
+    background: var(--m3-accent);
+    transform: scale(1.3);
+  }
+
+  /* ─── Two-col layout (render + callouts) ───────────────────── */
+  {% if section.settings.layout == 'split' %}
+  .ead-m3__body {
+    display: grid;
+    grid-template-columns: 1fr {{ section.settings.callout_col_width }}px;
+    gap: {{ section.settings.split_gap }}px;
+    align-items: start;
+  }
+  .ead-m3__stage-col { min-width: 0; }
+  .ead-m3__aside { display: flex; flex-direction: column; gap: 20px; }
+  {% else %}
+  .ead-m3__body { display: block; }
+  .ead-m3__aside { display: none; }
+  {% endif %}
+
+  /* ─── Feature Callout Cards ─────────────────────────────────── */
+  .ead-m3__callouts-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .ead-m3__callout {
+    background: var(--m3-surface);
+    border: 1px solid var(--m3-border);
+    border-radius: {{ section.settings.card_radius }}px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color 0.2s ease;
+  }
+
+  .ead-m3__callout:hover { border-color: var(--m3-accent); }
+
+  .ead-m3__callout-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--m3-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--m3-accent);
+  }
+
+  .ead-m3__callout-icon svg { width: 20px; height: 20px; }
+
+  .ead-m3__callout-body { min-width: 0; }
+
+  .ead-m3__callout-title {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--m3-text);
+    line-height: 1.3;
+  }
+
+  .ead-m3__callout-text {
+    margin: 0;
+    font-size: 13px;
+    color: var(--m3-subtext);
+    line-height: 1.5;
+  }
+
+  /* ─── Spec bar ──────────────────────────────────────────────── */
+  {% if section.settings.show_specs %}
+  .ead-m3__specs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--m3-border);
+    border: 1px solid var(--m3-border);
+    border-radius: {{ section.settings.card_radius }}px;
+    overflow: hidden;
+    margin-bottom: {{ section.settings.specs_gap }}px;
+  }
+
+  .ead-m3__spec {
+    background: var(--m3-surface);
+    padding: 24px 20px;
+    text-align: center;
+    transition: background 0.2s ease;
+  }
+
+  .ead-m3__spec:hover { background: rgba(255,255,255,0.03); }
+
+  .ead-m3__spec-value {
+    display: block;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--m3-accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .ead-m3__spec-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--m3-subtext);
+  }
+  {% endif %}
+
+  /* ─── Carbon fiber texture accent bar ──────────────────────── */
+  {% if section.settings.show_carbon_bar %}
+  .ead-m3__carbon-bar {
+    height: 3px;
+    background: repeating-linear-gradient(
+      45deg,
+      var(--m3-carbon) 0px,
+      var(--m3-carbon) 4px,
+      rgba(255,255,255,0.06) 4px,
+      rgba(255,255,255,0.06) 8px
+    );
+    margin-bottom: {{ section.settings.header_gap }}px;
+    border-radius: 2px;
+    opacity: 0.7;
+  }
+  {% endif %}
+
+  /* ─── CTA row ───────────────────────────────────────────────── */
+  {% if section.settings.show_cta %}
+  .ead-m3__cta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: {{ section.settings.cta_align }};
+    margin-top: {{ section.settings.cta_gap }}px;
+  }
+
+  .ead-m3__cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: var(--m3-accent);
+    color: var(--m3-bg);
+    border: 2px solid var(--m3-accent);
+    border-radius: {{ section.settings.btn_radius }}px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    cursor: pointer;
+  }
+
+  .ead-m3__cta-primary:hover {
+    background: transparent;
+    color: var(--m3-accent);
+    transform: translateY(-2px);
+  }
+
+  .ead-m3__cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--m3-text);
+    border: 2px solid var(--m3-border);
+    border-radius: {{ section.settings.btn_radius }}px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    cursor: pointer;
+  }
+
+  .ead-m3__cta-secondary:hover {
+    border-color: var(--m3-accent);
+    color: var(--m3-accent);
+    transform: translateY(-2px);
+  }
+
+  .ead-m3__cta-primary svg,
+  .ead-m3__cta-secondary svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .ead-m3__cta-primary:hover svg,
+  .ead-m3__cta-secondary:hover svg { transform: translateX(3px); }
+  {% endif %}
+
+  /* ─── Below-stage callouts (stacked layout) ─────────────────── */
+  {% unless section.settings.layout == 'split' %}
+  .ead-m3__callouts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: {{ section.settings.specs_gap }}px;
+  }
+  {% endunless %}
+
+  /* ─── Responsive ────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    {% if section.settings.layout == 'split' %}
+    .ead-m3__body {
+      grid-template-columns: 1fr;
+    }
+    .ead-m3__aside { display: none; }
+    .ead-m3__callouts-row { display: grid; }
+    {% endif %}
+  }
+
+  @media (max-width: 768px) {
+    .ead-m3__thumbs { display: none; }
+    .ead-m3__dots { display: flex; }
+
+    .ead-m3__nav {
+      width: 36px;
+      height: 36px;
+    }
+    .ead-m3__nav svg { width: 14px; height: 14px; }
+    .ead-m3__nav--prev { left: 8px; }
+    .ead-m3__nav--next { right: 8px; }
+
+    {% if section.settings.show_specs %}
+    .ead-m3__specs {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    {% endif %}
+
+    {% if section.settings.show_cta %}
+    .ead-m3__cta-row {
+      justify-content: center;
+    }
+    {% endif %}
+
+    .ead-m3__inner {
+      padding: 0 {{ section.settings.gutter | times: 0.6 | round }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    {% if section.settings.show_cta %}
+    .ead-m3__cta-row { flex-direction: column; align-items: stretch; }
+    .ead-m3__cta-primary, .ead-m3__cta-secondary { justify-content: center; }
+    {% endif %}
+  }
+</style>
+
+<section id="{{ section_id }}" class="ead-bmw-m3-showcase">
+  <div class="ead-m3__inner">
+
+    {%- comment -%} ── Carbon accent bar ── {%- endcomment -%}
+    {% if section.settings.show_carbon_bar %}
+      <div class="ead-m3__carbon-bar" aria-hidden="true"></div>
+    {% endif %}
+
+    {%- comment -%} ── Header ── {%- endcomment -%}
+    {% if section.settings.show_heading %}
+    <div class="ead-m3__header">
+      {% if section.settings.eyebrow != blank %}
+      <div class="ead-m3__eyebrow">
+        {% if section.settings.header_align == 'center' or section.settings.header_align == 'right' %}
+          <span class="ead-m3__eyebrow-line" aria-hidden="true"></span>
+        {% endif %}
+        <span class="ead-m3__eyebrow-text">{{ section.settings.eyebrow }}</span>
+        {% if section.settings.header_align == 'center' or section.settings.header_align == 'left' %}
+          <span class="ead-m3__eyebrow-line" aria-hidden="true"></span>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if section.settings.heading != blank %}
+        <h2 class="ead-m3__heading">{{ section.settings.heading }}</h2>
+      {% endif %}
+
+      {% if section.settings.subheading != blank %}
+        <p class="ead-m3__subheading">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {%- comment -%} ── Spec bar (above render) ── {%- endcomment -%}
+    {% if section.settings.show_specs and section.settings.specs_position == 'above' %}
+    <div class="ead-m3__specs" role="list">
+      {%- for spec in specs -%}
+        <div class="ead-m3__spec" role="listitem">
+          <span class="ead-m3__spec-value">{{ spec.settings.value }}</span>
+          <span class="ead-m3__spec-label">{{ spec.settings.label }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+    {% endif %}
+
+    {%- comment -%} ── Main body (stage + optional aside) ── {%- endcomment -%}
+    <div class="ead-m3__body">
+
+      <div class="ead-m3__stage-col">
+
+        {%- comment -%} ── Render stage ── {%- endcomment -%}
+        <div class="ead-m3__stage" role="region" aria-label="{{ section.settings.heading | default: 'BMW M3 Render Gallery' }} — image gallery" aria-roledescription="carousel">
+
+          <div class="ead-m3__track" id="ead-m3-track-{{ section.id }}" aria-live="polite">
+            {%- for slide in slides -%}
+              <div class="ead-m3__slide"
+                   role="group"
+                   aria-roledescription="slide"
+                   aria-label="{{ forloop.index }} of {{ slide_count }}{% if slide.settings.angle_label != blank %}: {{ slide.settings.angle_label }}{% endif %}">
+                {%- if slide.settings.image != blank -%}
+                  <img src="{{ slide.settings.image | image_url: width: 2000 }}"
+                       srcset="{{ slide.settings.image | image_url: width: 800 }} 800w,
+                               {{ slide.settings.image | image_url: width: 1200 }} 1200w,
+                               {{ slide.settings.image | image_url: width: 2000 }} 2000w"
+                       sizes="(max-width: 768px) 100vw, {{ section.settings.section_width }}px"
+                       alt="{{ slide.settings.image.alt | default: slide.settings.angle_label | default: 'BMW M3 render' | escape }}"
+                       width="{{ slide.settings.image.width }}"
+                       height="{{ slide.settings.image.height }}"
+                       loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                       class="ead-m3__slide-img">
+                {%- else -%}
+                  <div class="ead-m3__slide-placeholder" aria-hidden="true">
+                    BMW G80 M3 &mdash; {{ slide.settings.angle_label | default: 'Render' }}
+                  </div>
+                {%- endif -%}
+                {% if slide.settings.angle_label != blank %}
+                  <span class="ead-m3__slide-badge" aria-hidden="true">{{ slide.settings.angle_label }}</span>
+                {% endif %}
+              </div>
+            {%- else -%}
+              <div class="ead-m3__slide">
+                <div class="ead-m3__slide-placeholder">BMW G80 M3 &mdash; Add render slides in the theme editor</div>
+              </div>
+            {%- endfor -%}
+          </div>
+
+          {% if slide_count > 1 %}
+          <button class="ead-m3__nav ead-m3__nav--prev"
+                  id="ead-m3-prev-{{ section.id }}"
+                  aria-label="Previous render"
+                  aria-controls="ead-m3-track-{{ section.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="11 4 6 9 11 14"/>
+            </svg>
+          </button>
+          <button class="ead-m3__nav ead-m3__nav--next"
+                  id="ead-m3-next-{{ section.id }}"
+                  aria-label="Next render"
+                  aria-controls="ead-m3-track-{{ section.id }}">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="7 4 12 9 7 14"/>
+            </svg>
+          </button>
+          {% endif %}
+
+        </div>{%- comment -%} /.ead-m3__stage {%- endcomment -%}
+
+        {%- comment -%} ── Thumbnails ── {%- endcomment -%}
+        {% if slide_count > 1 %}
+        <div class="ead-m3__thumbs" role="tablist" aria-label="Select render angle">
+          {%- for slide in slides -%}
+            <button class="ead-m3__thumb{% if forloop.first %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-label="{% if slide.settings.angle_label != blank %}{{ slide.settings.angle_label }}{% else %}Slide {{ forloop.index }}{% endif %}"
+                    data-slide="{{ forloop.index0 }}"
+                    data-section="{{ section.id }}">
+              {%- if slide.settings.image != blank -%}
+                <img src="{{ slide.settings.image | image_url: width: 300 }}"
+                     alt="{{ slide.settings.image.alt | default: slide.settings.angle_label | escape }}"
+                     width="300"
+                     loading="lazy">
+              {%- endif -%}
+            </button>
+          {%- endfor -%}
+        </div>
+
+        <div class="ead-m3__dots" role="tablist" aria-label="Select render">
+          {%- for slide in slides -%}
+            <button class="ead-m3__dot{% if forloop.first %} is-active{% endif %}"
+                    role="tab"
+                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                    aria-label="Slide {{ forloop.index }}"
+                    data-slide="{{ forloop.index0 }}"
+                    data-section="{{ section.id }}"></button>
+          {%- endfor -%}
+        </div>
+        {% endif %}
+
+        {%- comment -%} ── Callouts (stacked layout, below stage) ── {%- endcomment -%}
+        {% unless section.settings.layout == 'split' %}
+          {% if callouts.size > 0 %}
+          <div class="ead-m3__callouts-row">
+            {%- for c in callouts -%}
+              <div class="ead-m3__callout">
+                <div class="ead-m3__callout-icon" aria-hidden="true">
+                  {%- case c.settings.icon -%}
+                    {%- when 'carbon' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    {%- when 'speed' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M22 2L12 12"/><circle cx="12" cy="12" r="2"/></svg>
+                    {%- when 'engine' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 7V5M17 7V5M7 17v2M17 17v2"/><path d="M21 10h2M1 10h2"/></svg>
+                    {%- when 'aero' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5"/><polyline points="11 21 16 21 22 15"/><line x1="17" y1="21" x2="17" y2="15"/><line x1="22" y1="21" x2="22" y2="21"/></svg>
+                    {%- when 'brake' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                    {%- when 'exhaust' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+                    {%- else -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  {%- endcase -%}
+                </div>
+                <div class="ead-m3__callout-body">
+                  <h3 class="ead-m3__callout-title">{{ c.settings.title }}</h3>
+                  {% if c.settings.text != blank %}
+                    <p class="ead-m3__callout-text">{{ c.settings.text }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            {%- endfor -%}
+          </div>
+          {% endif %}
+        {% endunless %}
+
+        {%- comment -%} ── Spec bar (below render) ── {%- endcomment -%}
+        {% if section.settings.show_specs and section.settings.specs_position == 'below' %}
+        <div class="ead-m3__specs" role="list">
+          {%- for spec in specs -%}
+            <div class="ead-m3__spec" role="listitem">
+              <span class="ead-m3__spec-value">{{ spec.settings.value }}</span>
+              <span class="ead-m3__spec-label">{{ spec.settings.label }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+        {% endif %}
+
+        {%- comment -%} ── CTA Row ── {%- endcomment -%}
+        {% if section.settings.show_cta %}
+        <div class="ead-m3__cta-row">
+          {% if section.settings.cta_primary_label != blank and section.settings.cta_primary_url != blank %}
+          <a href="{{ section.settings.cta_primary_url }}" class="ead-m3__cta-primary">
+            {{ section.settings.cta_primary_label }}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h12M8 2l5 5-5 5"/></svg>
+          </a>
+          {% endif %}
+          {% if section.settings.cta_secondary_label != blank and section.settings.cta_secondary_url != blank %}
+          <a href="{{ section.settings.cta_secondary_url }}" class="ead-m3__cta-secondary">
+            {{ section.settings.cta_secondary_label }}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h12M8 2l5 5-5 5"/></svg>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
+      </div>{%- comment -%} /.ead-m3__stage-col {%- endcomment -%}
+
+      {%- comment -%} ── Aside (split layout only) ── {%- endcomment -%}
+      {% if section.settings.layout == 'split' %}
+      <aside class="ead-m3__aside">
+        {% if callouts.size > 0 %}
+        <div class="ead-m3__callouts-stack">
+          {%- for c in callouts -%}
+            <div class="ead-m3__callout">
+              <div class="ead-m3__callout-icon" aria-hidden="true">
+                {%- case c.settings.icon -%}
+                  {%- when 'carbon' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                  {%- when 'speed' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M22 2L12 12"/><circle cx="12" cy="12" r="2"/></svg>
+                  {%- when 'engine' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M7 7V5M17 7V5M7 17v2M17 17v2"/><path d="M21 10h2M1 10h2"/></svg>
+                  {%- when 'aero' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v5"/><polyline points="11 21 16 21 22 15"/><line x1="17" y1="21" x2="17" y2="15"/><line x1="22" y1="21" x2="22" y2="21"/></svg>
+                  {%- when 'brake' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                  {%- when 'exhaust' -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+                  {%- else -%}
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                {%- endcase -%}
+              </div>
+              <div class="ead-m3__callout-body">
+                <h3 class="ead-m3__callout-title">{{ c.settings.title }}</h3>
+                {% if c.settings.text != blank %}
+                  <p class="ead-m3__callout-text">{{ c.settings.text }}</p>
+                {% endif %}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+        {% endif %}
+
+        {% if section.settings.show_specs and section.settings.specs_position == 'aside' %}
+        <div class="ead-m3__specs" style="grid-template-columns: 1fr 1fr;" role="list">
+          {%- for spec in specs -%}
+            <div class="ead-m3__spec" role="listitem">
+              <span class="ead-m3__spec-value">{{ spec.settings.value }}</span>
+              <span class="ead-m3__spec-label">{{ spec.settings.label }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+        {% endif %}
+
+        {% if section.settings.show_cta %}
+        <div class="ead-m3__cta-row" style="justify-content: flex-start; flex-direction: column; align-items: flex-start;">
+          {% if section.settings.cta_primary_label != blank and section.settings.cta_primary_url != blank %}
+          <a href="{{ section.settings.cta_primary_url }}" class="ead-m3__cta-primary" style="width: 100%; justify-content: center;">
+            {{ section.settings.cta_primary_label }}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h12M8 2l5 5-5 5"/></svg>
+          </a>
+          {% endif %}
+          {% if section.settings.cta_secondary_label != blank and section.settings.cta_secondary_url != blank %}
+          <a href="{{ section.settings.cta_secondary_url }}" class="ead-m3__cta-secondary" style="width: 100%; justify-content: center;">
+            {{ section.settings.cta_secondary_label }}
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h12M8 2l5 5-5 5"/></svg>
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+      </aside>
+      {% endif %}
+
+    </div>{%- comment -%} /.ead-m3__body {%- endcomment -%}
+
+    {%- comment -%} ── Spec bar (footer position) ── {%- endcomment -%}
+    {% if section.settings.show_specs and section.settings.specs_position == 'footer' %}
+    <div class="ead-m3__specs" role="list">
+      {%- for spec in specs -%}
+        <div class="ead-m3__spec" role="listitem">
+          <span class="ead-m3__spec-value">{{ spec.settings.value }}</span>
+          <span class="ead-m3__spec-label">{{ spec.settings.label }}</span>
+        </div>
+      {%- endfor -%}
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var ROOT = document.getElementById('{{ section_id }}');
+  if (!ROOT) return;
+
+  var track     = ROOT.querySelector('#ead-m3-track-{{ section.id }}');
+  var slides    = Array.from(ROOT.querySelectorAll('.ead-m3__slide'));
+  var thumbBtns = Array.from(ROOT.querySelectorAll('.ead-m3__thumb'));
+  var dotBtns   = Array.from(ROOT.querySelectorAll('.ead-m3__dot'));
+  var prevBtn   = ROOT.querySelector('#ead-m3-prev-{{ section.id }}');
+  var nextBtn   = ROOT.querySelector('#ead-m3-next-{{ section.id }}');
+
+  var total   = slides.length;
+  var current = 0;
+
+  if (!track || total < 2) return;
+
+  /* ── Go to slide ─────────────────────────────────────────────── */
+  function goTo(index) {
+    current = (index + total) % total;
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
+
+    thumbBtns.forEach(function (b, i) {
+      var active = i === current;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    dotBtns.forEach(function (b, i) {
+      var active = i === current;
+      b.classList.toggle('is-active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+
+  /* ── Arrow buttons ───────────────────────────────────────────── */
+  if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
+  if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
+
+  /* ── Thumbnail / dot clicks ──────────────────────────────────── */
+  thumbBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () { goTo(parseInt(btn.dataset.slide, 10)); });
+  });
+  dotBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () { goTo(parseInt(btn.dataset.slide, 10)); });
+  });
+
+  /* ── Touch / swipe ───────────────────────────────────────────── */
+  var touchStartX = null;
+  var touchStartY = null;
+
+  track.addEventListener('touchstart', function (e) {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  track.addEventListener('touchend', function (e) {
+    if (touchStartX === null) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      goTo(dx < 0 ? current + 1 : current - 1);
+    }
+    touchStartX = null;
+    touchStartY = null;
+  }, { passive: true });
+
+  /* ── Keyboard navigation when focused ───────────────────────── */
+  ROOT.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  /* ── Autoplay ────────────────────────────────────────────────── */
+  {% if section.settings.autoplay %}
+  var autoplayInterval = setInterval(function () { goTo(current + 1); }, {{ section.settings.autoplay_speed | times: 1000 }});
+
+  ROOT.addEventListener('mouseenter', function () { clearInterval(autoplayInterval); });
+  ROOT.addEventListener('mouseleave', function () {
+    autoplayInterval = setInterval(function () { goTo(current + 1); }, {{ section.settings.autoplay_speed | times: 1000 }});
+  });
+  {% endif %}
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "BMW M3 Showcase",
+  "tag": "div",
+  "class": "ead-bmw-m3-showcase-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show heading block",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "Euro Auto Design — G80 M3"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Main heading",
+      "default": "BMW G80 <em>M3</em>\nCarbon Aero Edition"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Satin Frozen Gray. Full carbon aero kit. Aggressive stance — shop the complete G80 M3 parts catalog."
+    },
+    {
+      "type": "select",
+      "id": "header_align",
+      "label": "Header alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading max font size",
+      "min": 32,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "header_gap",
+      "label": "Space below header",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout mode",
+      "options": [
+        { "value": "stacked", "label": "Stacked (full-width render)" },
+        { "value": "split",   "label": "Split (render + side panel)" }
+      ],
+      "default": "stacked"
+    },
+    {
+      "type": "range",
+      "id": "callout_col_width",
+      "label": "Side panel width (split layout)",
+      "min": 240,
+      "max": 480,
+      "step": 20,
+      "unit": "px",
+      "default": 340
+    },
+    {
+      "type": "range",
+      "id": "split_gap",
+      "label": "Gap between render and side panel",
+      "min": 12,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Render Stage"
+    },
+    {
+      "type": "select",
+      "id": "stage_aspect",
+      "label": "Stage aspect ratio",
+      "options": [
+        { "value": "16/9",  "label": "16:9 Widescreen" },
+        { "value": "3/2",   "label": "3:2 Classic" },
+        { "value": "4/3",   "label": "4:3 Standard" },
+        { "value": "1/1",   "label": "1:1 Square" },
+        { "value": "21/9",  "label": "21:9 Cinematic" }
+      ],
+      "default": "16/9"
+    },
+    {
+      "type": "range",
+      "id": "stage_radius",
+      "label": "Stage corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "stage_border",
+      "label": "Show border around stage",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "stage_gap",
+      "label": "Space below stage",
+      "min": 12,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Thumbnails"
+    },
+    {
+      "type": "range",
+      "id": "thumb_width",
+      "label": "Thumbnail width",
+      "min": 60,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "range",
+      "id": "thumb_height",
+      "label": "Thumbnail height",
+      "min": 40,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "thumb_gap",
+      "label": "Gap between thumbnails",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "thumb_radius",
+      "label": "Thumbnail corner radius",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Autoplay"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay slides",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay interval (seconds)",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Specs Bar"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_specs",
+      "label": "Show specs bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "specs_position",
+      "label": "Specs position",
+      "options": [
+        { "value": "above",  "label": "Above render" },
+        { "value": "below",  "label": "Below render" },
+        { "value": "footer", "label": "Footer (below everything)" },
+        { "value": "aside",  "label": "Aside (split layout only)" }
+      ],
+      "default": "footer"
+    },
+    {
+      "type": "range",
+      "id": "specs_gap",
+      "label": "Space below specs",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "CTA Buttons"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cta",
+      "label": "Show CTA buttons",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_label",
+      "label": "Primary button label",
+      "default": "Shop G80 M3 Parts"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_url",
+      "label": "Primary button URL"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Secondary button label",
+      "default": "View All BMW"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_url",
+      "label": "Secondary button URL"
+    },
+    {
+      "type": "select",
+      "id": "cta_align",
+      "label": "CTA alignment",
+      "options": [
+        { "value": "flex-start", "label": "Left" },
+        { "value": "center",     "label": "Center" },
+        { "value": "flex-end",   "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "cta_gap",
+      "label": "Space above CTA",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Accents"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_carbon_bar",
+      "label": "Show carbon fiber accent bar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "surface_color",
+      "label": "Surface / card background",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Primary text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "subtext_color",
+      "label": "Secondary / muted text",
+      "default": "#888888"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent (gold / highlight)",
+      "default": "#c9a96e"
+    },
+    {
+      "type": "color",
+      "id": "carbon_color",
+      "label": "Carbon fiber bar color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#222222"
+    },
+    {
+      "type": "header",
+      "content": "Borders & Radius"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "btn_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_width",
+      "label": "Max section width",
+      "min": 800,
+      "max": 1920,
+      "step": 20,
+      "unit": "px",
+      "default": 1440
+    },
+    {
+      "type": "range",
+      "id": "gutter",
+      "label": "Side gutter",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Section padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Section padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    }
+  ],
+  "blocks": [
+    {
+      "type": "render_slide",
+      "name": "Render Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Render image",
+          "info": "Upload the CGI studio render. Recommended: 2000×1500px or wider, PNG/JPEG."
+        },
+        {
+          "type": "text",
+          "id": "angle_label",
+          "label": "Angle / view label",
+          "info": "Shown as a small badge on the image (e.g. Front Three-Quarter, Rear View)",
+          "default": "Front Three-Quarter"
+        }
+      ]
+    },
+    {
+      "type": "feature_callout",
+      "name": "Feature Callout",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "carbon",  "label": "Carbon Fiber / Layers" },
+            { "value": "speed",   "label": "Speed / Performance" },
+            { "value": "engine",  "label": "Engine / Power" },
+            { "value": "aero",    "label": "Aero / Aerodynamics" },
+            { "value": "brake",   "label": "Brakes / Wheels" },
+            { "value": "exhaust", "label": "Exhaust" },
+            { "value": "default", "label": "Info / Other" }
+          ],
+          "default": "carbon"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Feature title",
+          "default": "Full Carbon Aero Kit"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Feature description",
+          "default": "Front lip, side skirts, rear diffuser, hood vents & mirror caps — all in dry carbon fiber."
+        }
+      ]
+    },
+    {
+      "type": "spec_item",
+      "name": "Spec Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Value",
+          "default": "503hp"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Peak Power"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "BMW M3 Showcase",
+      "blocks": [
+        {
+          "type": "render_slide",
+          "settings": {
+            "angle_label": "Front Three-Quarter"
+          }
+        },
+        {
+          "type": "render_slide",
+          "settings": {
+            "angle_label": "Front View"
+          }
+        },
+        {
+          "type": "render_slide",
+          "settings": {
+            "angle_label": "Headlight Detail"
+          }
+        },
+        {
+          "type": "render_slide",
+          "settings": {
+            "angle_label": "Rear Three-Quarter"
+          }
+        },
+        {
+          "type": "feature_callout",
+          "settings": {
+            "icon": "carbon",
+            "title": "Full Carbon Aero Kit",
+            "text": "Front lip splitter, side skirts, rear diffuser, trunk spoiler, hood vents & carbon mirror caps."
+          }
+        },
+        {
+          "type": "feature_callout",
+          "settings": {
+            "icon": "engine",
+            "title": "S58 Twin-Turbo",
+            "text": "3.0L straight-six producing up to 503hp in Competition trim. Zero to 60 in 3.5 seconds."
+          }
+        },
+        {
+          "type": "feature_callout",
+          "settings": {
+            "icon": "aero",
+            "title": "Aggressive Stance",
+            "text": "Lowered suspension, flared arches, and 20\" forged multi-spoke wheels in gloss black."
+          }
+        },
+        {
+          "type": "feature_callout",
+          "settings": {
+            "icon": "exhaust",
+            "title": "Quad Exhaust",
+            "text": "Large-bore quad-tip titanium exhaust system with full rear diffuser integration."
+          }
+        },
+        {
+          "type": "spec_item",
+          "settings": {
+            "value": "503hp",
+            "label": "Peak Power"
+          }
+        },
+        {
+          "type": "spec_item",
+          "settings": {
+            "value": "479lb",
+            "label": "Peak Torque"
+          }
+        },
+        {
+          "type": "spec_item",
+          "settings": {
+            "value": "3.5s",
+            "label": "0–60 mph"
+          }
+        },
+        {
+          "type": "spec_item",
+          "settings": {
+            "value": "180+",
+            "label": "Top Speed (mph)"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
