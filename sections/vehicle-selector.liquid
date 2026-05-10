@@ -1,0 +1,1743 @@
+{% comment %}
+  Euro Auto Design — Vehicle Selector Section
+  OS 2.0 | Full Theme Customizer Control
+  Blocks: brand, submenu_item, vehicle_card
+{% endcomment %}
+
+{%- liquid
+  assign section_id = 'ead-vs-' | append: section.id
+  assign pad_top    = section.settings.padding_top | append: 'px'
+  assign pad_bot    = section.settings.padding_bottom | append: 'px'
+  assign cols_desk  = section.settings.cards_columns_desktop
+  assign cols_mob   = section.settings.cards_columns_mobile
+-%}
+
+<style>
+  /* ─── CSS Custom Properties ─────────────────────────────────── */
+  #{{ section_id }} {
+    --vs-bg:           {{ section.settings.bg_color }};
+    --vs-text:         {{ section.settings.text_color }};
+    --vs-subtext:      {{ section.settings.subtext_color }};
+    --vs-accent:       {{ section.settings.accent_color }};
+    --vs-border:       {{ section.settings.border_color }};
+    --vs-card-bg:      {{ section.settings.card_bg_color }};
+    --vs-btn-bg:       {{ section.settings.button_bg_color }};
+    --vs-btn-text:     {{ section.settings.button_text_color }};
+    --vs-btn-hover-bg: {{ section.settings.button_hover_bg }};
+    --vs-radius:       {{ section.settings.border_radius }}px;
+    --vs-card-radius:  {{ section.settings.card_radius }}px;
+    --vs-cols-desk:    {{ cols_desk }};
+    --vs-cols-mob:     {{ cols_mob }};
+    --vs-pt:           {{ pad_top }};
+    --vs-pb:           {{ pad_bot }};
+  }
+
+  /* ─── Section Wrapper ───────────────────────────────────────── */
+  #{{ section_id }} {
+    background-color: var(--vs-bg);
+    color: var(--vs-text);
+    padding-top: var(--vs-pt);
+    padding-bottom: var(--vs-pb);
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  #{{ section_id }} *,
+  #{{ section_id }} *::before,
+  #{{ section_id }} *::after { box-sizing: inherit; }
+
+  .ead-vs__inner {
+    max-width: {{ section.settings.section_width }}px;
+    margin: 0 auto;
+    padding: 0 {{ section.settings.section_gutter }}px;
+  }
+
+  /* ─── Header ────────────────────────────────────────────────── */
+  .ead-vs__header {
+    text-align: {{ section.settings.heading_align }};
+    margin-bottom: {{ section.settings.heading_gap }}px;
+  }
+
+  .ead-vs__heading {
+    margin: 0 0 10px;
+    font-size: clamp(24px, 3vw, {{ section.settings.heading_size }}px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--vs-text);
+  }
+
+  .ead-vs__subheading {
+    margin: 0;
+    font-size: clamp(13px, 1.5vw, 16px);
+    color: var(--vs-subtext);
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Brand Grid ────────────────────────────────────────────── */
+  .ead-vs__brands {
+    display: flex;
+    flex-wrap: wrap;
+    gap: {{ section.settings.brand_gap }}px;
+    justify-content: center;
+    list-style: none;
+    margin: 0 0 0 0;
+    padding: 0;
+  }
+
+  .ead-vs__brand-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--vs-border);
+    border-radius: var(--vs-radius);
+    cursor: pointer;
+    padding: {{ section.settings.brand_pad_v }}px {{ section.settings.brand_pad_h }}px;
+    width: {{ section.settings.brand_width }}px;
+    height: {{ section.settings.brand_height }}px;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ead-vs__brand-btn:hover {
+    background: var(--vs-btn-hover-bg);
+    border-color: var(--vs-accent);
+    transform: translateY(-2px);
+  }
+
+  .ead-vs__brand-btn.is-active {
+    background: var(--vs-btn-bg);
+    border-color: var(--vs-accent);
+  }
+
+  .ead-vs__brand-btn.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--vs-accent);
+  }
+
+  .ead-vs__brand-logo {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    filter: {{ section.settings.logo_filter }};
+    transition: filter 0.2s ease;
+    display: block;
+  }
+
+  .ead-vs__brand-btn:hover .ead-vs__brand-logo,
+  .ead-vs__brand-btn.is-active .ead-vs__brand-logo {
+    filter: {{ section.settings.logo_filter_active }};
+  }
+
+  .ead-vs__brand-name-text {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vs-text);
+  }
+
+  /* ─── Submenu ───────────────────────────────────────────────── */
+  .ead-vs__submenu-wrap {
+    margin-top: {{ section.settings.submenu_gap_top }}px;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .ead-vs__submenu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .ead-vs__submenu.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    height: auto;
+    overflow: visible;
+    padding-bottom: 4px;
+  }
+
+  .ead-vs__sub-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 22px;
+    border: 1px solid var(--vs-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--vs-subtext);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .ead-vs__sub-btn:hover {
+    background: var(--vs-btn-hover-bg);
+    color: var(--vs-text);
+    border-color: var(--vs-accent);
+  }
+
+  .ead-vs__sub-btn.is-active {
+    background: var(--vs-accent);
+    color: var(--vs-btn-text);
+    border-color: var(--vs-accent);
+  }
+
+  /* ─── Divider ───────────────────────────────────────────────── */
+  .ead-vs__divider {
+    border: none;
+    border-top: 1px solid var(--vs-border);
+    margin: {{ section.settings.divider_gap }}px 0;
+    opacity: 0.4;
+  }
+
+  /* ─── Cards Grid ────────────────────────────────────────────── */
+  .ead-vs__cards-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--vs-cols-desk), 1fr);
+    gap: {{ section.settings.card_gap }}px;
+    transition: opacity 0.2s ease;
+  }
+
+  /* ─── Single Card ───────────────────────────────────────────── */
+  .ead-vs__card {
+    background: var(--vs-card-bg);
+    border: 1px solid var(--vs-border);
+    border-radius: var(--vs-card-radius);
+    overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ead-vs__card:hover {
+    transform: translateY(-4px);
+    border-color: var(--vs-accent);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+  }
+
+  .ead-vs__card-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .ead-vs__card-img-wrap {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: {{ section.settings.card_aspect_ratio }};
+    background: #111;
+  }
+
+  .ead-vs__card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+
+  .ead-vs__card:hover .ead-vs__card-img { transform: scale(1.04); }
+
+  .ead-vs__card-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.15);
+    background: linear-gradient(135deg, #111, #1a1a1a);
+  }
+
+  .ead-vs__card-body {
+    padding: {{ section.settings.card_body_pad }}px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 8px;
+  }
+
+  .ead-vs__card-title {
+    margin: 0;
+    font-size: clamp(15px, 1.5vw, 18px);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--vs-text);
+    line-height: 1.3;
+  }
+
+  .ead-vs__card-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--vs-subtext);
+    line-height: 1.4;
+  }
+
+  .ead-vs__card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: auto;
+    padding: 10px 20px;
+    background: var(--vs-btn-bg);
+    color: var(--vs-btn-text);
+    border: 1px solid var(--vs-accent);
+    border-radius: var(--vs-radius);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .ead-vs__card-cta:hover {
+    background: var(--vs-accent);
+    color: var(--vs-bg);
+  }
+
+  .ead-vs__card-cta svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  .ead-vs__card:hover .ead-vs__card-cta svg { transform: translateX(3px); }
+
+  /* ─── Empty State ───────────────────────────────────────────── */
+  .ead-vs__empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--vs-subtext);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    display: none;
+  }
+
+  .ead-vs__empty.is-visible { display: block; }
+
+  /* ─── Card hidden state ─────────────────────────────────────── */
+  .ead-vs__card.is-hidden {
+    display: none;
+  }
+
+  /* ─── Mobile ────────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .ead-vs__cards-grid {
+      grid-template-columns: repeat({{ section.settings.cards_columns_tablet | default: 3 }}, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .ead-vs__cards-grid {
+      grid-template-columns: repeat(var(--vs-cols-mob), 1fr);
+      gap: {{ section.settings.card_gap | times: 0.75 | round }}px;
+    }
+
+    .ead-vs__brands {
+      gap: {{ section.settings.brand_gap | times: 0.7 | round }}px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .ead-vs__brand-btn {
+      width: {{ section.settings.brand_width | times: 0.8 | round }}px;
+      height: {{ section.settings.brand_height | times: 0.8 | round }}px;
+    }
+
+    .ead-vs__submenu { justify-content: flex-start; }
+
+    .ead-vs__inner {
+      padding: 0 {{ section.settings.section_gutter | times: 0.6 | round }}px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ead-vs__brand-btn {
+      width: {{ section.settings.brand_width | times: 0.68 | round }}px;
+      height: {{ section.settings.brand_height | times: 0.68 | round }}px;
+    }
+  }
+
+  /* ─── Brand scroller on mobile (optional overflow scroll) ───── */
+  {% if section.settings.brands_scroll_mobile %}
+  @media (max-width: 768px) {
+    .ead-vs__brands {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 8px;
+      justify-content: flex-start;
+    }
+    .ead-vs__brands::-webkit-scrollbar { height: 3px; }
+    .ead-vs__brands::-webkit-scrollbar-track { background: transparent; }
+    .ead-vs__brands::-webkit-scrollbar-thumb { background: var(--vs-border); border-radius: 2px; }
+    .ead-vs__brand-btn { scroll-snap-align: start; flex-shrink: 0; }
+  }
+  {% endif %}
+</style>
+
+<section id="{{ section_id }}" class="ead-vehicle-selector">
+  <div class="ead-vs__inner">
+
+    {%- comment -%} ── Header ── {%- endcomment -%}
+    {% if section.settings.show_heading %}
+    <div class="ead-vs__header">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="ead-vs__heading">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="ead-vs__subheading">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </div>
+    {% endif %}
+
+    {%- comment -%} ── Brand Selector ── {%- endcomment -%}
+    <div class="ead-vs__brands" role="tablist" aria-label="{{ section.settings.brand_aria_label | default: 'Select vehicle brand' }}">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'brand' -%}
+          <button class="ead-vs__brand-btn"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="ead-submenu-{{ section.id }}-{{ block.settings.brand_handle }}"
+                  data-brand="{{ block.settings.brand_handle }}"
+                  {{ block.shopify_attributes }}>
+            {%- if block.settings.brand_logo != blank -%}
+              <img src="{{ block.settings.brand_logo | image_url: width: 240 }}"
+                   alt="{{ block.settings.brand_name | escape }}"
+                   width="120"
+                   height="60"
+                   loading="lazy"
+                   class="ead-vs__brand-logo">
+            {%- else -%}
+              <span class="ead-vs__brand-name-text">{{ block.settings.brand_name }}</span>
+            {%- endif -%}
+          </button>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} ── Submenus (one per brand, shown/hidden) ── {%- endcomment -%}
+    <div class="ead-vs__submenu-wrap" aria-live="polite" aria-atomic="false">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'brand' -%}
+          {%- assign b_handle = block.settings.brand_handle -%}
+          <div class="ead-vs__submenu"
+               id="ead-submenu-{{ section.id }}-{{ b_handle }}"
+               role="tabpanel"
+               data-submenu="{{ b_handle }}"
+               aria-label="{{ block.settings.brand_name }} categories">
+
+            {%- for sub in section.blocks -%}
+              {%- if sub.type == 'submenu_item' and sub.settings.brand_handle == b_handle -%}
+                {%- unless sub.settings.hide_item -%}
+                  <a class="ead-vs__sub-btn"
+                     data-category="{{ sub.settings.category_handle }}"
+                     {% if sub.settings.link_url != blank and sub.settings.navigate_on_click %}
+                       href="{{ sub.settings.link_url }}"
+                     {% else %}
+                       href="#"
+                       data-filter-only="true"
+                     {% endif %}
+                     {{ sub.shopify_attributes }}>
+                    {{ sub.settings.label }}
+                  </a>
+                {%- endunless -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} ── Divider ── {%- endcomment -%}
+    {% if section.settings.show_divider %}
+    <hr class="ead-vs__divider">
+    {% endif %}
+
+    {%- comment -%} ── Vehicle Cards ── {%- endcomment -%}
+    <div class="ead-vs__cards-grid" id="ead-cards-{{ section.id }}">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'vehicle_card' -%}
+          <article class="ead-vs__card"
+                   data-card-brand="{{ block.settings.brand_handle }}"
+                   data-card-category="{{ block.settings.category_handle }}"
+                   {{ block.shopify_attributes }}>
+            <a class="ead-vs__card-link"
+               href="{{ block.settings.card_url }}"
+               aria-label="{{ block.settings.card_title | escape }}">
+
+              <div class="ead-vs__card-img-wrap">
+                {%- if block.settings.card_image != blank -%}
+                  <img src="{{ block.settings.card_image | image_url: width: 800 }}"
+                       alt="{{ block.settings.card_image.alt | default: block.settings.card_title | escape }}"
+                       width="800"
+                       loading="lazy"
+                       class="ead-vs__card-img">
+                {%- else -%}
+                  <div class="ead-vs__card-img-placeholder">
+                    {{ block.settings.card_title | slice: 0, 1 | upcase }}
+                  </div>
+                {%- endif -%}
+              </div>
+
+              <div class="ead-vs__card-body">
+                <h3 class="ead-vs__card-title">{{ block.settings.card_title }}</h3>
+                {%- if block.settings.card_subtitle != blank -%}
+                  <p class="ead-vs__card-subtitle">{{ block.settings.card_subtitle }}</p>
+                {%- endif -%}
+                <span class="ead-vs__card-cta">
+                  {{- block.settings.card_cta | default: 'Shop Parts' -}}
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M1 6h10M7 2l4 4-4 4"/>
+                  </svg>
+                </span>
+              </div>
+
+            </a>
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <div class="ead-vs__empty" id="ead-empty-{{ section.id }}" role="status">
+      {{ section.settings.empty_text | default: 'No models found for this selection.' }}
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  var ROOT      = document.getElementById('{{ section_id }}');
+  if (!ROOT) return;
+
+  var brandBtns  = Array.from(ROOT.querySelectorAll('.ead-vs__brand-btn'));
+  var submenus   = Array.from(ROOT.querySelectorAll('.ead-vs__submenu'));
+  var cards      = Array.from(ROOT.querySelectorAll('.ead-vs__card'));
+  var emptyMsg   = ROOT.querySelector('.ead-vs__empty');
+  var cardsGrid  = ROOT.querySelector('.ead-vs__cards-grid');
+
+  var activeBrand    = null;
+  var activeCategory = null;
+
+  /* ── helpers ─────────────────────────────────────────────────── */
+  function setActive(els, target, attr, klass) {
+    els.forEach(function (el) {
+      var match = el[attr] === target;
+      el.classList.toggle(klass, match);
+      if (attr === 'dataset.brand' || el.getAttribute('role') === 'tab') {
+        el.setAttribute('aria-selected', match ? 'true' : 'false');
+      }
+    });
+  }
+
+  function filterCards() {
+    var visible = 0;
+    cards.forEach(function (card) {
+      var brandOk = !activeBrand || card.dataset.cardBrand === activeBrand;
+      var catOk   = !activeCategory
+                    || activeCategory === 'all'
+                    || activeCategory === ''
+                    || card.dataset.cardCategory === activeCategory;
+      var show = brandOk && catOk;
+      card.classList.toggle('is-hidden', !show);
+      if (show) visible++;
+    });
+    emptyMsg.classList.toggle('is-visible', visible === 0);
+  }
+
+  /* ── submenu show/hide ───────────────────────────────────────── */
+  function showSubmenu(brandHandle) {
+    submenus.forEach(function (sm) {
+      var isThis = sm.dataset.submenu === brandHandle;
+      sm.classList.toggle('is-visible', isThis);
+    });
+  }
+
+  /* ── activate first submenu item for a brand ─────────────────── */
+  function activateFirstSubItem(brandHandle) {
+    var sm = ROOT.querySelector('.ead-vs__submenu[data-submenu="' + brandHandle + '"]');
+    if (!sm) return;
+    var first = sm.querySelector('.ead-vs__sub-btn');
+    if (first) activateSubItem(first, sm);
+  }
+
+  function activateSubItem(btn, sm) {
+    sm = sm || btn.closest('.ead-vs__submenu');
+    sm.querySelectorAll('.ead-vs__sub-btn').forEach(function (b) {
+      b.classList.remove('is-active');
+    });
+    btn.classList.add('is-active');
+    activeCategory = btn.dataset.category || '';
+  }
+
+  /* ── brand selection ─────────────────────────────────────────── */
+  function selectBrand(brandHandle) {
+    activeBrand = brandHandle;
+    activeCategory = null;
+
+    brandBtns.forEach(function (btn) {
+      var match = btn.dataset.brand === brandHandle;
+      btn.classList.toggle('is-active', match);
+      btn.setAttribute('aria-selected', match ? 'true' : 'false');
+    });
+
+    showSubmenu(brandHandle);
+    activateFirstSubItem(brandHandle);
+    filterCards();
+  }
+
+  /* ── event: brand click ──────────────────────────────────────── */
+  brandBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      selectBrand(btn.dataset.brand);
+    });
+  });
+
+  /* ── event: submenu click ────────────────────────────────────── */
+  submenus.forEach(function (sm) {
+    sm.querySelectorAll('.ead-vs__sub-btn').forEach(function (subBtn) {
+      subBtn.addEventListener('click', function (e) {
+        if (subBtn.dataset.filterOnly === 'true') {
+          e.preventDefault();
+        }
+        activateSubItem(subBtn, sm);
+        filterCards();
+      });
+    });
+  });
+
+  /* ── init: auto-select first brand ──────────────────────────── */
+  if (brandBtns.length > 0) {
+    selectBrand(brandBtns[0].dataset.brand);
+  } else {
+    filterCards();
+  }
+
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Vehicle Selector",
+  "tag": "div",
+  "class": "ead-vehicle-selector-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_heading",
+      "label": "Show heading",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop By Vehicle"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Select your brand, choose your model, and find the right parts."
+    },
+    {
+      "type": "select",
+      "id": "heading_align",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "heading_size",
+      "label": "Heading font size (px, desktop max)",
+      "min": 20,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "heading_gap",
+      "label": "Space below heading",
+      "min": 10,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty-state message",
+      "default": "No models found for this selection."
+    },
+    {
+      "type": "header",
+      "content": "Layout & Spacing"
+    },
+    {
+      "type": "range",
+      "id": "section_width",
+      "label": "Max section width",
+      "min": 800,
+      "max": 1920,
+      "step": 20,
+      "unit": "px",
+      "default": 1440
+    },
+    {
+      "type": "range",
+      "id": "section_gutter",
+      "label": "Side gutter",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Section padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Section padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Brand Selector"
+    },
+    {
+      "type": "range",
+      "id": "brand_width",
+      "label": "Brand tile width",
+      "min": 80,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 140
+    },
+    {
+      "type": "range",
+      "id": "brand_height",
+      "label": "Brand tile height",
+      "min": 50,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "brand_pad_v",
+      "label": "Brand tile vertical padding",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "brand_pad_h",
+      "label": "Brand tile horizontal padding",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "brand_gap",
+      "label": "Gap between brand tiles",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "checkbox",
+      "id": "brands_scroll_mobile",
+      "label": "Horizontal scroll on mobile (instead of wrap)",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "logo_filter",
+      "label": "Logo color (default state)",
+      "options": [
+        { "value": "brightness(0) invert(1)", "label": "White" },
+        { "value": "brightness(0) invert(0)", "label": "Black" },
+        { "value": "none", "label": "Original color" },
+        { "value": "grayscale(1) brightness(2)", "label": "Light grey" },
+        { "value": "grayscale(1) brightness(0.5)", "label": "Dark grey" }
+      ],
+      "default": "brightness(0) invert(0.6)"
+    },
+    {
+      "type": "select",
+      "id": "logo_filter_active",
+      "label": "Logo color (active/hover state)",
+      "options": [
+        { "value": "brightness(0) invert(1)", "label": "White" },
+        { "value": "brightness(0) invert(0)", "label": "Black" },
+        { "value": "none", "label": "Original color" }
+      ],
+      "default": "brightness(0) invert(1)"
+    },
+    {
+      "type": "text",
+      "id": "brand_aria_label",
+      "label": "Brand selector ARIA label (accessibility)",
+      "default": "Select vehicle brand"
+    },
+    {
+      "type": "header",
+      "content": "Submenu"
+    },
+    {
+      "type": "range",
+      "id": "submenu_gap_top",
+      "label": "Space above submenu",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Divider"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_divider",
+      "label": "Show divider line",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "divider_gap",
+      "label": "Divider vertical margin",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Vehicle Cards"
+    },
+    {
+      "type": "range",
+      "id": "cards_columns_desktop",
+      "label": "Columns — desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "cards_columns_tablet",
+      "label": "Columns — tablet (769–1024px)",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "cards_columns_mobile",
+      "label": "Columns — mobile (≤768px)",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 4,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "card_aspect_ratio",
+      "label": "Card image aspect ratio",
+      "options": [
+        { "value": "16/9", "label": "16:9 Widescreen" },
+        { "value": "4/3", "label": "4:3 Standard" },
+        { "value": "3/2", "label": "3:2 Classic" },
+        { "value": "1/1", "label": "1:1 Square" },
+        { "value": "5/4", "label": "5:4 Portrait" }
+      ],
+      "default": "16/9"
+    },
+    {
+      "type": "range",
+      "id": "card_body_pad",
+      "label": "Card body padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Primary text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "subtext_color",
+      "label": "Secondary / muted text",
+      "default": "#888888"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent (borders, highlights)",
+      "default": "#c9a96e"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Default border",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Button / active tile background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg",
+      "label": "Button hover background",
+      "default": "#1e1e1e"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text / active submenu text",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "header",
+      "content": "Borders & Radius"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Button border radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 6
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand",
+      "settings": [
+        {
+          "type": "text",
+          "id": "brand_name",
+          "label": "Brand name",
+          "info": "Displayed when no logo is uploaded",
+          "default": "BMW"
+        },
+        {
+          "type": "text",
+          "id": "brand_handle",
+          "label": "Brand handle (unique ID, no spaces)",
+          "info": "Used internally to link submenus and cards. Must be unique per brand. E.g. bmw, audi, mercedes",
+          "default": "bmw"
+        },
+        {
+          "type": "image_picker",
+          "id": "brand_logo",
+          "label": "Brand logo image"
+        }
+      ]
+    },
+    {
+      "type": "submenu_item",
+      "name": "Submenu Button",
+      "settings": [
+        {
+          "type": "text",
+          "id": "brand_handle",
+          "label": "Brand handle",
+          "info": "Must exactly match the Brand handle above (e.g. bmw)",
+          "default": "bmw"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Button label",
+          "default": "All"
+        },
+        {
+          "type": "text",
+          "id": "category_handle",
+          "label": "Category handle",
+          "info": "Used to filter vehicle cards. Use 'all' or leave blank to show all cards for this brand. Must match the category handle on the vehicle card.",
+          "default": "all"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link URL",
+          "info": "Optional. If 'Navigate on click' is on, clicking will go to this URL. If off, it filters cards instead."
+        },
+        {
+          "type": "checkbox",
+          "id": "navigate_on_click",
+          "label": "Navigate to URL on click",
+          "info": "If enabled, clicking this button goes to the URL above. If disabled, it filters cards on the page.",
+          "default": false
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_item",
+          "label": "Hide this button",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "vehicle_card",
+      "name": "Vehicle Card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "brand_handle",
+          "label": "Brand handle",
+          "info": "Must exactly match a Brand handle (e.g. bmw)",
+          "default": "bmw"
+        },
+        {
+          "type": "text",
+          "id": "category_handle",
+          "label": "Category handle",
+          "info": "Must match a submenu category handle (e.g. coupe, suv, sedan). Leave blank to always show for this brand.",
+          "default": ""
+        },
+        {
+          "type": "image_picker",
+          "id": "card_image",
+          "label": "Vehicle image"
+        },
+        {
+          "type": "text",
+          "id": "card_title",
+          "label": "Model name",
+          "default": "M4 Competition"
+        },
+        {
+          "type": "text",
+          "id": "card_subtitle",
+          "label": "Subtitle / description",
+          "default": ""
+        },
+        {
+          "type": "url",
+          "id": "card_url",
+          "label": "Link to collection or page"
+        },
+        {
+          "type": "text",
+          "id": "card_cta",
+          "label": "Button label",
+          "default": "Shop Parts"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Vehicle Selector",
+      "blocks": [
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "BMW",
+            "brand_handle": "bmw"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "bmw",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "bmw",
+            "label": "Coupe",
+            "category_handle": "coupe"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "bmw",
+            "label": "Sedan / Wagon",
+            "category_handle": "sedan"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "bmw",
+            "label": "SUV",
+            "category_handle": "suv"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "bmw",
+            "label": "Electric",
+            "category_handle": "electric"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "bmw",
+            "category_handle": "coupe",
+            "card_title": "M4 Competition",
+            "card_subtitle": "F82 / G82",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "bmw",
+            "category_handle": "coupe",
+            "card_title": "M2 Competition",
+            "card_subtitle": "F87 / G87",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "bmw",
+            "category_handle": "sedan",
+            "card_title": "M3 Competition",
+            "card_subtitle": "F80 / G80",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "bmw",
+            "category_handle": "suv",
+            "card_title": "X5 M",
+            "card_subtitle": "F85 / F95",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Audi",
+            "brand_handle": "audi"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "audi",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "audi",
+            "label": "Coupe",
+            "category_handle": "coupe"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "audi",
+            "label": "Sedan",
+            "category_handle": "sedan"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "audi",
+            "label": "SUV",
+            "category_handle": "suv"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "audi",
+            "category_handle": "coupe",
+            "card_title": "RS5",
+            "card_subtitle": "B9 / B9.5",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "audi",
+            "category_handle": "sedan",
+            "card_title": "RS4 Avant",
+            "card_subtitle": "B9 / B9.5",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Mercedes-Benz",
+            "brand_handle": "mercedes"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mercedes",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mercedes",
+            "label": "Coupe",
+            "category_handle": "coupe"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mercedes",
+            "label": "Sedan",
+            "category_handle": "sedan"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mercedes",
+            "label": "SUV",
+            "category_handle": "suv"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "mercedes",
+            "category_handle": "coupe",
+            "card_title": "AMG GT 63",
+            "card_subtitle": "C192 / X290",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "mercedes",
+            "category_handle": "sedan",
+            "card_title": "C63 AMG",
+            "card_subtitle": "W205 / W206",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "McLaren",
+            "brand_handle": "mclaren"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mclaren",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mclaren",
+            "label": "Sport Series",
+            "category_handle": "sport"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "mclaren",
+            "label": "Super Series",
+            "category_handle": "super"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "mclaren",
+            "category_handle": "sport",
+            "card_title": "570S / 570GT",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "mclaren",
+            "category_handle": "super",
+            "card_title": "720S",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Nissan",
+            "brand_handle": "nissan"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "nissan",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "nissan",
+            "label": "GT-R",
+            "category_handle": "gtr"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "nissan",
+            "label": "370Z / 400Z",
+            "category_handle": "z"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "nissan",
+            "category_handle": "gtr",
+            "card_title": "GT-R R35",
+            "card_subtitle": "2009–Present",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "nissan",
+            "category_handle": "z",
+            "card_title": "370Z",
+            "card_subtitle": "Z34",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Lamborghini",
+            "brand_handle": "lamborghini"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "lamborghini",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "lamborghini",
+            "label": "Huracan",
+            "category_handle": "huracan"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "lamborghini",
+            "label": "Urus",
+            "category_handle": "urus"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "lamborghini",
+            "category_handle": "huracan",
+            "card_title": "Huracán EVO",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "lamborghini",
+            "category_handle": "urus",
+            "card_title": "Urus S / Performante",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Porsche",
+            "brand_handle": "porsche"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "porsche",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "porsche",
+            "label": "911",
+            "category_handle": "911"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "porsche",
+            "label": "Cayenne",
+            "category_handle": "cayenne"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "porsche",
+            "label": "Panamera",
+            "category_handle": "panamera"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "porsche",
+            "category_handle": "911",
+            "card_title": "911 GT3 RS",
+            "card_subtitle": "992",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "porsche",
+            "category_handle": "911",
+            "card_title": "911 Turbo S",
+            "card_subtitle": "992",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "porsche",
+            "category_handle": "cayenne",
+            "card_title": "Cayenne Turbo GT",
+            "card_subtitle": "9Y3",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Tesla",
+            "brand_handle": "tesla"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "tesla",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "tesla",
+            "label": "Model S",
+            "category_handle": "model-s"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "tesla",
+            "label": "Model 3",
+            "category_handle": "model-3"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "tesla",
+            "label": "Model X / Y",
+            "category_handle": "model-x-y"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "tesla",
+            "category_handle": "model-s",
+            "card_title": "Model S Plaid",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "tesla",
+            "category_handle": "model-3",
+            "card_title": "Model 3 Performance",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Toyota",
+            "brand_handle": "toyota"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "toyota",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "toyota",
+            "label": "Supra",
+            "category_handle": "supra"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "toyota",
+            "label": "GR86 / BRZ",
+            "category_handle": "gr86"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "toyota",
+            "category_handle": "supra",
+            "card_title": "GR Supra A90",
+            "card_subtitle": "2019–Present",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "toyota",
+            "category_handle": "gr86",
+            "card_title": "GR86",
+            "card_subtitle": "ZN8",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "brand_name": "Volkswagen",
+            "brand_handle": "volkswagen"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "volkswagen",
+            "label": "All",
+            "category_handle": "all"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "volkswagen",
+            "label": "Golf",
+            "category_handle": "golf"
+          }
+        },
+        {
+          "type": "submenu_item",
+          "settings": {
+            "brand_handle": "volkswagen",
+            "label": "Arteon",
+            "category_handle": "arteon"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "volkswagen",
+            "category_handle": "golf",
+            "card_title": "Golf R Mk8",
+            "card_cta": "Shop Parts"
+          }
+        },
+        {
+          "type": "vehicle_card",
+          "settings": {
+            "brand_handle": "volkswagen",
+            "category_handle": "arteon",
+            "card_title": "Arteon R",
+            "card_cta": "Shop Parts"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
