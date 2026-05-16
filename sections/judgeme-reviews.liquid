@@ -1,0 +1,967 @@
+{% comment %}
+  Euro Auto Design — Judge.me Reviews Section
+  OS 2.0 | Premium Redesign | Full Customizer Control
+  Styles Judge.me's all-reviews widget with a futuristic black/grey metallic aesthetic.
+{% endcomment %}
+
+{%- liquid
+  assign section_id   = 'ead-rv-' | append: section.id
+  assign eyebrow      = section.settings.eyebrow_text
+  assign heading      = section.settings.heading_text
+  assign support      = section.settings.support_text
+  assign show_line    = section.settings.show_accent_line
+  assign line_w       = section.settings.accent_line_width | append: 'px'
+  assign hover_anim   = section.settings.enable_hover_anim
+  assign mob_layout   = section.settings.mobile_layout
+  assign cards_desk   = section.settings.cards_per_row_desktop
+  assign text_clamp   = section.settings.review_text_clamp
+  assign shadow_px    = section.settings.card_shadow_strength
+  assign shadow_blur  = section.settings.card_shadow_strength | times: 4
+  assign shadow_alpha = '0.07'
+  assign pt_d         = section.settings.padding_top_desktop | append: 'px'
+  assign pb_d         = section.settings.padding_bottom_desktop | append: 'px'
+  assign pt_m         = section.settings.padding_top_mobile | append: 'px'
+  assign pb_m         = section.settings.padding_bottom_mobile | append: 'px'
+  assign gap_d        = section.settings.card_gap_desktop | append: 'px'
+  assign gap_m        = section.settings.card_gap_mobile | append: 'px'
+  assign pad_d        = section.settings.card_padding_desktop | append: 'px'
+  assign pad_m        = section.settings.card_padding_mobile | append: 'px'
+  assign img_d        = section.settings.image_height_desktop | append: 'px'
+  assign img_m        = section.settings.image_height_mobile | append: 'px'
+  assign max_h        = section.settings.card_max_height | append: 'px'
+-%}
+
+<style>
+  /* ─── CSS Custom Properties ──────────────────────────────────── */
+  #{{ section_id }} {
+    --rv-bg:          {{ section.settings.bg_color }};
+    --rv-card-bg:     {{ section.settings.card_bg_color }};
+    --rv-border:      {{ section.settings.card_border_color }};
+    --rv-radius:      {{ section.settings.card_radius }}px;
+    --rv-shadow:      0 {{ shadow_px }}px {{ shadow_blur }}px rgba(0,0,0,{{ shadow_alpha }});
+    --rv-shadow-h:    0 8px 28px rgba(0,0,0,0.13);
+    --rv-gap-d:       {{ gap_d }};
+    --rv-gap-m:       {{ gap_m }};
+    --rv-pad-d:       {{ pad_d }};
+    --rv-pad-m:       {{ pad_m }};
+    --rv-img-d:       {{ img_d }};
+    --rv-img-m:       {{ img_m }};
+    --rv-max-h:       {{ max_h }};
+    --rv-cols-d:      {{ cards_desk }};
+    --rv-clamp:       {{ text_clamp }};
+    --rv-eyebrow-fs:  {{ section.settings.eyebrow_font_size }}px;
+    --rv-heading-fs:  {{ section.settings.heading_font_size }}px;
+    --rv-support-fs:  {{ section.settings.support_font_size }}px;
+    --rv-name-fs:     {{ section.settings.name_font_size }}px;
+    --rv-review-fs:   {{ section.settings.review_font_size }}px;
+    --rv-badge-fs:    {{ section.settings.badge_font_size }}px;
+    --rv-star-size:   {{ section.settings.star_size }}px;
+    --rv-ls:          {{ section.settings.letter_spacing }}em;
+    --rv-fw:          {{ section.settings.font_weight }};
+    --rv-grad:        linear-gradient(135deg, #000000 0%, #3a3a3a 40%, #7c7c7c 75%, #d0d0d0 100%);
+    --rv-grad-metal:  linear-gradient(180deg, #111111 0%, #3d3d3d 50%, #888888 100%);
+    --rv-grad-empty:  linear-gradient(180deg, #c0c0c0 0%, #e0e0e0 100%);
+    --rv-border-h:    #555555;
+  }
+
+  /* ─── Section wrapper ────────────────────────────────────────── */
+  #{{ section_id }} {
+    background-color: var(--rv-bg);
+    padding-top:    {{ pt_d }};
+    padding-bottom: {{ pb_d }};
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  #{{ section_id }} *,
+  #{{ section_id }} *::before,
+  #{{ section_id }} *::after { box-sizing: inherit; }
+
+  /* ─── Inner container ────────────────────────────────────────── */
+  #{{ section_id }} .ead-rv__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ─── Header ─────────────────────────────────────────────────── */
+  #{{ section_id }} .ead-rv__header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  #{{ section_id }} .ead-rv__eyebrow {
+    margin: 0 0 14px;
+    font-size: var(--rv-eyebrow-fs);
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+  }
+
+  #{{ section_id }} .ead-rv__heading {
+    margin: 0 0 18px;
+    font-size: clamp(22px, 3vw, var(--rv-heading-fs));
+    font-weight: var(--rv-fw);
+    letter-spacing: var(--rv-ls);
+    text-transform: uppercase;
+    line-height: 1.1;
+    background: var(--rv-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  #{{ section_id }} .ead-rv__accent-line {
+    {% if show_line %}display: block;{% else %}display: none;{% endif %}
+    width: {{ line_w }};
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #555555 50%, transparent 100%);
+    margin: 0 auto 18px;
+  }
+
+  #{{ section_id }} .ead-rv__support {
+    margin: 0;
+    font-size: var(--rv-support-fs);
+    color: #5a5a5a;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  #{{ section_id }} .ead-rv__check-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    flex-shrink: 0;
+  }
+  #{{ section_id }} .ead-rv__check-icon svg {
+    width: 9px;
+    height: 9px;
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ─── Widget wrapper ─────────────────────────────────────────── */
+  #{{ section_id }} .ead-rv__widget-wrap {
+    width: 100%;
+  }
+
+  /* ─── Judge.me: suppress default chrome ─────────────────────── */
+  #{{ section_id }} .jdgm-widget,
+  #{{ section_id }} .jdgm-all-reviews-widget,
+  #{{ section_id }} .jdgm-rev-widg {
+    font-family: inherit !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #{{ section_id }} .jdgm-all-reviews-text-header,
+  #{{ section_id }} .jdgm-all-reviews__summary,
+  #{{ section_id }} .jdgm-histogram,
+  #{{ section_id }} .jdgm-rev-widg__header,
+  #{{ section_id }} .jdgm-all-reviews__form-wrap,
+  #{{ section_id }} .jdgm-form,
+  #{{ section_id }} .jdgm-all-reviews__search,
+  #{{ section_id }} .jdgm-all-reviews__filter,
+  #{{ section_id }} .jdgm-write-rev-link-wrap,
+  #{{ section_id }} .jdgm-spinner {
+    display: none !important;
+  }
+
+  /* ─── Review grid ────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev-widg__reviews,
+  #{{ section_id }} .jdgm-all-reviews__reviews {
+    display: grid !important;
+    grid-template-columns: repeat(var(--rv-cols-d), 1fr) !important;
+    gap: var(--rv-gap-d) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    align-items: start !important;
+  }
+
+  /* ─── Review card ────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev {
+    background: var(--rv-card-bg) !important;
+    border: 1px solid var(--rv-border) !important;
+    border-radius: var(--rv-radius) !important;
+    padding: var(--rv-pad-d) !important;
+    box-shadow: var(--rv-shadow) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    margin: 0 !important;
+    {% if hover_anim %}
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+    {% else %}
+    transition: none !important;
+    {% endif %}
+  }
+
+  {% if hover_anim %}
+  @media (hover: hover) {
+    #{{ section_id }} .jdgm-rev:hover {
+      transform: translateY(-3px) !important;
+      box-shadow: var(--rv-shadow-h) !important;
+      border-color: var(--rv-border-h) !important;
+    }
+  }
+  {% endif %}
+
+  /* ─── Card top row: avatar + meta ────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__header {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 0 !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+
+  /* ─── Avatar ─────────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__icon {
+    width: var(--rv-img-d) !important;
+    height: var(--rv-img-d) !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    background: linear-gradient(135deg, #1c1c1c, #404040) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  #{{ section_id }} .jdgm-rev__icon-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block !important;
+  }
+
+  #{{ section_id }} .jdgm-rev__icon-initials {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    font-size: calc(var(--rv-img-d) * 0.38) !important;
+    font-weight: 600 !important;
+    color: #cccccc !important;
+    -webkit-text-fill-color: #cccccc !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* ─── Meta column (name, stars, badge, date) ─────────────────── */
+  #{{ section_id }} .jdgm-rev__header > .jdgm-rev__meta,
+  #{{ section_id }} .jdgm-rev__header-left,
+  #{{ section_id }} .jdgm-rev__info {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* ─── Author name ────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__author {
+    display: block !important;
+    font-size: var(--rv-name-fs) !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.25 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    background: var(--rv-grad) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  /* ─── Stars ──────────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__rating {
+    display: flex !important;
+    align-items: center !important;
+    gap: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+  }
+
+  #{{ section_id }} .jdgm-star {
+    font-size: var(--rv-star-size) !important;
+    line-height: 1 !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: transparent !important;
+  }
+
+  #{{ section_id }} .jdgm--filled,
+  #{{ section_id }} .jdgm-star.jdgm--filled {
+    background: var(--rv-grad-metal) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  #{{ section_id }} .jdgm--half,
+  #{{ section_id }} .jdgm-star.jdgm--half {
+    background: linear-gradient(180deg, #555555 0%, #999999 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  #{{ section_id }} .jdgm--empty,
+  #{{ section_id }} .jdgm-star.jdgm--empty {
+    background: var(--rv-grad-empty) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  /* ─── Verified badge ─────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__badge,
+  #{{ section_id }} [class*="jdgm-rev__badge"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: var(--rv-badge-fs) !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.1em !important;
+    text-transform: uppercase !important;
+    background: #111111 !important;
+    color: #b8b8b8 !important;
+    -webkit-text-fill-color: #b8b8b8 !important;
+    padding: 2px 7px 2px 5px !important;
+    border-radius: 2px !important;
+    border: none !important;
+    margin: 0 !important;
+    align-self: flex-start !important;
+    box-shadow: none !important;
+  }
+
+  /* Small checkmark before badge text */
+  #{{ section_id }} .jdgm-rev__badge::before {
+    content: '✓' !important;
+    font-size: calc(var(--rv-badge-fs) + 1px) !important;
+    font-weight: 700 !important;
+    color: #888888 !important;
+    -webkit-text-fill-color: #888888 !important;
+  }
+
+  /* ─── Timestamp ──────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__timestamp {
+    font-size: 10px !important;
+    color: #999999 !important;
+    -webkit-text-fill-color: #999999 !important;
+    letter-spacing: 0.03em !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* ─── Divider between header and body ────────────────────────── */
+  #{{ section_id }} .jdgm-rev__divider,
+  #{{ section_id }} hr.jdgm-rev__divider {
+    display: none !important;
+  }
+
+  /* ─── Review body ────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-rev__body {
+    flex: 1 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  #{{ section_id }} .jdgm-rev__title {
+    display: block !important;
+    font-size: calc(var(--rv-review-fs) + 1px) !important;
+    font-weight: 600 !important;
+    color: #1a1a1a !important;
+    -webkit-text-fill-color: #1a1a1a !important;
+    margin: 0 0 6px !important;
+    letter-spacing: 0.025em !important;
+    line-height: 1.3 !important;
+  }
+
+  #{{ section_id }} .jdgm-rev__content {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: var(--rv-review-fs) !important;
+    color: #505050 !important;
+    -webkit-text-fill-color: #505050 !important;
+    line-height: 1.65 !important;
+    letter-spacing: 0.01em !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: var(--rv-clamp) !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  /* ─── Review product images — keep hidden by default ─────────── */
+  #{{ section_id }} .jdgm-rev__pics,
+  #{{ section_id }} .jdgm-rev__product {
+    display: none !important;
+  }
+
+  /* ─── Pagination ─────────────────────────────────────────────── */
+  #{{ section_id }} .jdgm-paginate {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin-top: 36px !important;
+    padding: 0 !important;
+    list-style: none !important;
+  }
+
+  #{{ section_id }} .jdgm-paginate a,
+  #{{ section_id }} .jdgm-paginate span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0 8px !important;
+    border: 1px solid #cccccc !important;
+    border-radius: 3px !important;
+    font-size: 12px !important;
+    color: #444444 !important;
+    -webkit-text-fill-color: #444444 !important;
+    text-decoration: none !important;
+    letter-spacing: 0.04em !important;
+    background: transparent !important;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+  }
+
+  #{{ section_id }} .jdgm-paginate a:hover {
+    background: #1a1a1a !important;
+    border-color: #1a1a1a !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  #{{ section_id }} .jdgm-paginate .jdgm--active,
+  #{{ section_id }} .jdgm-paginate [aria-current] {
+    background: #1a1a1a !important;
+    border-color: #1a1a1a !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  /* ─── Tablet: 2-column grid ──────────────────────────────────── */
+  @media (min-width: 601px) and (max-width: 1024px) {
+    #{{ section_id }} .jdgm-rev-widg__reviews,
+    #{{ section_id }} .jdgm-all-reviews__reviews {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  /* ─── Mobile ─────────────────────────────────────────────────── */
+  @media (max-width: 600px) {
+    #{{ section_id }} {
+      padding-top:    {{ pt_m }};
+      padding-bottom: {{ pb_m }};
+    }
+
+    #{{ section_id }} .ead-rv__inner {
+      padding: 0 16px;
+    }
+
+    #{{ section_id }} .ead-rv__header {
+      margin-bottom: 32px;
+    }
+
+    {% if mob_layout == 'carousel' %}
+    /* ── Swipeable carousel on mobile ── */
+    #{{ section_id }} .ead-rv__widget-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    #{{ section_id }} .ead-rv__widget-wrap::-webkit-scrollbar { display: none; }
+
+    #{{ section_id }} .jdgm-rev-widg__reviews,
+    #{{ section_id }} .jdgm-all-reviews__reviews {
+      display: flex !important;
+      flex-wrap: nowrap !important;
+      grid-template-columns: none !important;
+      gap: var(--rv-gap-m) !important;
+    }
+
+    #{{ section_id }} .jdgm-rev {
+      width: min(76vw, 290px) !important;
+      flex-shrink: 0 !important;
+      scroll-snap-align: start !important;
+      padding: var(--rv-pad-m) !important;
+    }
+
+    {% else %}
+    /* ── Stacked cards on mobile ── */
+    #{{ section_id }} .jdgm-rev-widg__reviews,
+    #{{ section_id }} .jdgm-all-reviews__reviews {
+      grid-template-columns: 1fr !important;
+      gap: var(--rv-gap-m) !important;
+    }
+
+    #{{ section_id }} .jdgm-rev {
+      padding: var(--rv-pad-m) !important;
+    }
+    {% endif %}
+
+    #{{ section_id }} .jdgm-rev__icon {
+      width: var(--rv-img-m) !important;
+      height: var(--rv-img-m) !important;
+    }
+  }
+
+  /* ─── Prefers reduced motion ─────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    #{{ section_id }} .jdgm-rev {
+      transition: none !important;
+    }
+  }
+</style>
+
+<section id="{{ section_id }}" class="ead-rv" aria-label="{{ heading | escape }}">
+  <div class="ead-rv__inner">
+
+    {%- comment -%} ── Section Header ── {%- endcomment -%}
+    <header class="ead-rv__header">
+      {%- unless eyebrow == blank -%}
+        <p class="ead-rv__eyebrow">{{ eyebrow | escape }}</p>
+      {%- endunless -%}
+
+      {%- unless heading == blank -%}
+        <h2 class="ead-rv__heading">{{ heading | escape }}</h2>
+      {%- endunless -%}
+
+      <span class="ead-rv__accent-line" aria-hidden="true"></span>
+
+      {%- unless support == blank -%}
+        <p class="ead-rv__support">
+          {%- if section.settings.show_verified_icon -%}
+            <span class="ead-rv__check-icon" aria-hidden="true">
+              <svg viewBox="0 0 10 8" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="1,4 3.5,6.5 9,1"/>
+              </svg>
+            </span>
+          {%- endif -%}
+          {{ support | escape }}
+        </p>
+      {%- endunless -%}
+    </header>
+
+    {%- comment -%} ── Judge.me Widget ── {%- endcomment -%}
+    <div class="ead-rv__widget-wrap">
+      {% render 'judgeme_widgets', widget_type: 'judgeme_all_reviews_widget', concierge_install: true %}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Reviews (Judge.me)",
+  "tag": "div",
+  "class": "ead-reviews-section",
+  "limit": 1,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Content"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow_text",
+      "label": "Eyebrow label",
+      "default": "Verified Customer Reviews"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Main heading",
+      "default": "Why Drivers Love Euro Auto Design"
+    },
+    {
+      "type": "text",
+      "id": "support_text",
+      "label": "Supporting text",
+      "default": "Trusted by enthusiasts across the community"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_verified_icon",
+      "label": "Show verified icon next to supporting text",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Accent Line"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_accent_line",
+      "label": "Show accent line below heading",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "accent_line_width",
+      "label": "Accent line width",
+      "min": 20,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Section background",
+      "default": "#EFEFEF"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Card border color",
+      "default": "#E0E0E0"
+    },
+    {
+      "type": "header",
+      "content": "Card Style"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card corner radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_strength",
+      "label": "Card shadow strength",
+      "info": "Controls shadow offset. Set to 0 for no shadow.",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "card_max_height",
+      "label": "Card max height",
+      "info": "Clips cards to this height. Increase if reviews get cut off.",
+      "min": 160,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 300
+    },
+    {
+      "type": "range",
+      "id": "review_text_clamp",
+      "label": "Review text line clamp",
+      "info": "Number of lines to show before truncating.",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_hover_anim",
+      "label": "Enable card hover animation",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Desktop Layout"
+    },
+    {
+      "type": "range",
+      "id": "cards_per_row_desktop",
+      "label": "Cards per row (desktop)",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "range",
+      "id": "card_gap_desktop",
+      "label": "Gap between cards (desktop)",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_padding_desktop",
+      "label": "Card inner padding (desktop)",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "image_height_desktop",
+      "label": "Avatar size (desktop)",
+      "min": 28,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Mobile Layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_layout",
+      "label": "Mobile layout",
+      "options": [
+        { "value": "carousel", "label": "Horizontal carousel (swipeable)" },
+        { "value": "stacked",  "label": "Stacked cards (vertical)" }
+      ],
+      "default": "carousel"
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "label": "Gap between cards (mobile)",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_padding_mobile",
+      "label": "Card inner padding (mobile)",
+      "min": 12,
+      "max": 36,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "image_height_mobile",
+      "label": "Avatar size (mobile)",
+      "min": 24,
+      "max": 52,
+      "step": 4,
+      "unit": "px",
+      "default": 34
+    },
+    {
+      "type": "header",
+      "content": "Desktop Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_desktop",
+      "label": "Padding top (desktop)",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_desktop",
+      "label": "Padding bottom (desktop)",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 72
+    },
+    {
+      "type": "header",
+      "content": "Mobile Padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top_mobile",
+      "label": "Padding top (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom_mobile",
+      "label": "Padding bottom (mobile)",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "header",
+      "content": "Typography — Sizes"
+    },
+    {
+      "type": "range",
+      "id": "eyebrow_font_size",
+      "label": "Eyebrow font size",
+      "min": 9,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 11
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size (desktop max)",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "support_font_size",
+      "label": "Supporting text font size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "name_font_size",
+      "label": "Customer name font size",
+      "min": 11,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "review_font_size",
+      "label": "Review text font size",
+      "min": 11,
+      "max": 17,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "badge_font_size",
+      "label": "Verified badge font size",
+      "min": 8,
+      "max": 13,
+      "step": 1,
+      "unit": "px",
+      "default": 9
+    },
+    {
+      "type": "range",
+      "id": "star_size",
+      "label": "Star size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Typography — Style"
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Heading font weight",
+      "options": [
+        { "value": "400", "label": "Regular (400)" },
+        { "value": "500", "label": "Medium (500)" },
+        { "value": "600", "label": "Semi-bold (600)" },
+        { "value": "700", "label": "Bold (700)" },
+        { "value": "800", "label": "Extra-bold (800)" },
+        { "value": "900", "label": "Black (900)" }
+      ],
+      "default": "700"
+    },
+    {
+      "type": "select",
+      "id": "letter_spacing",
+      "label": "Heading letter spacing",
+      "options": [
+        { "value": "0",    "label": "None" },
+        { "value": "0.03", "label": "Tight (0.03em)" },
+        { "value": "0.06", "label": "Normal (0.06em)" },
+        { "value": "0.1",  "label": "Wide (0.10em)" },
+        { "value": "0.15", "label": "Extra wide (0.15em)" }
+      ],
+      "default": "0.06"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reviews (Judge.me)"
+    }
+  ]
+}
+{% endschema %}
